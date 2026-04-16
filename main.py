@@ -1,16 +1,14 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Optional
-import sqlite3
 import os
+import sqlite3
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import contextmanager
 import json
-from datetime import datetime
 
-app = FastAPI(title="Yamaha Piano Store")
+app = FastAPI()
 
-# CORS Middleware
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,244 +18,196 @@ app.add_middleware(
 )
 
 # Database setup
+DB_PATH = "./app.db"
+
+@contextmanager
 def get_db():
-    conn = sqlite3.connect("./app.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 def init_db():
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    # Create pianos table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS pianos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            model TEXT NOT NULL,
-            category TEXT NOT NULL,
-            price REAL NOT NULL,
-            description TEXT,
-            features TEXT,
-            image_url TEXT,
-            in_stock INTEGER DEFAULT 1,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    
-    # Create orders table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS orders (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            customer_name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            phone TEXT NOT NULL,
-            address TEXT NOT NULL,
-            piano_id INTEGER NOT NULL,
-            quantity INTEGER DEFAULT 1,
-            total_price REAL NOT NULL,
-            status TEXT DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (piano_id) REFERENCES pianos (id)
-        )
-    """)
-    
-    # Create contact messages table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS contacts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            subject TEXT,
-            message TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    
-    # Insert sample Yamaha pianos if table is empty
-    cursor.execute("SELECT COUNT(*) FROM pianos")
-    if cursor.fetchone()[0] == 0:
-        sample_pianos = [
-            ("Yamaha CFX Concert Grand", "CFX", "Grand Piano", 179999.99, 
-             "The Yamaha CFX is our flagship 9' concert grand piano, a full, rich tone with a wide palette of tonal colors.",
-             '["Full concert grand size", "Hand-crafted in Japan", "Premium Spruce soundboard", "88 keys", "Polished Ebony finish"]',
-             "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=800", 1),
-            
-            ("Yamaha C7X Grand Piano", "C7X", "Grand Piano", 89999.99,
-             "The C7X delivers powerful bass and a clear treble, making it ideal for professional performances.",
-             '["7\'6\" semi-concert grand", "A.R.E. treated soundboard", "German Röslau strings", "Slow-close fallboard"]',
-             "https://images.unsplash.com/photo-1552422535-c45813c61732?w=800", 1),
-            
-            ("Yamaha C3X Grand Piano", "C3X", "Grand Piano", 54999.99,
-             "The C3X offers the perfect balance of size and sound for home and studio use.",
-             '["6\'1\" conservatory grand", "Duplex scaling", "Sostenuto pedal", "Premium hammer felts"]',
-             "https://images.unsplash.com/photo-1514119412350-e174d90d280e?w=800", 1),
-            
-            ("Yamaha U3 Upright Piano", "U3", "Upright Piano", 14999.99,
-             "The U3 is the world's best-selling professional upright piano with exceptional tonal depth.",
-             '["52\" professional upright", "Spruce soundboard", "131cm height", "Soft-close fallboard"]',
-             "https://images.unsplash.com/photo-1577002216534-0a0c36c8cb58?w=800", 1),
-            
-            ("Yamaha U1 Upright Piano", "U1", "Upright Piano", 11999.99,
-             "The U1 delivers professional-level sound in a more compact size, perfect for home practice.",
-             '["48\" upright", "Acoustic optimizer", "Premium hammers", "3 pedals"]',
-             "https://images.unsplash.com/photo-1571974599782-87624638275e?w=800", 1),
-            
-            ("Yamaha CLP-795GP Clavinova", "CLP-795GP", "Digital Piano", 8999.99,
-             "Experience the grandeur of a grand piano with the convenience of digital technology.",
-             '["CFX and Bösendorfer samples", "GrandTouch-S keyboard", "Binaural sampling", "Bluetooth connectivity"]',
-             "https://images.unsplash.com/photo-1549490349-8643362247b5?w=800", 1),
-            
-            ("Yamaha CLP-745 Clavinova", "CLP-745", "Digital Piano", 3499.99,
-             "Premium digital piano with authentic grand piano touch and tone.",
-             '["GrandTouch-S keyboard", "Virtual Resonance Modeling", "303 Voices", "USB Audio Recording"]',
-             "https://images.unsplash.com/photo-1461784121038-f088ca1e7714?w=800", 1),
-            
-            ("Yamaha P-515 Portable Piano", "P-515", "Digital Piano", 1499.99,
-             "Top-of-the-line portable piano with Natural Wood X keyboard and CFX/Bösendorfer sounds.",
-             '["Natural Wood X keyboard", "CFX & Bösendorfer samples", "Bluetooth Audio", "40 Voices"]',
-             "https://images.unsplash.com/photo-1516916759473-600c07bc12d4?w=800", 1),
-            
-            ("Yamaha GB1K Baby Grand", "GB1K", "Grand Piano", 16999.99,
-             "The perfect entry point into Yamaha grand piano ownership.",
-             '["5\' baby grand", "Yamaha action", "Polished Ebony finish", "Made in Indonesia"]',
-             "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800", 1),
-            
-            ("Yamaha AvantGrand N3X", "N3X", "Hybrid Piano", 19999.99,
-             "The ultimate hybrid piano combining acoustic action with digital sound technology.",
-             '["Real grand piano action", "Spatial Acoustic Speaker System", "CFX & Bösendorfer samples", "Tactile Response System"]',
-             "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800", 1),
-        ]
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS pianos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                brand TEXT NOT NULL,
+                price REAL NOT NULL,
+                type TEXT NOT NULL,
+                keys INTEGER NOT NULL,
+                description TEXT,
+                image_url TEXT,
+                in_stock BOOLEAN DEFAULT 1
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS cart (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                piano_id INTEGER NOT NULL,
+                quantity INTEGER NOT NULL,
+                FOREIGN KEY (piano_id) REFERENCES pianos (id)
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                address TEXT NOT NULL,
+                total_price REAL NOT NULL,
+                items TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
         
-        cursor.executemany("""
-            INSERT INTO pianos (name, model, category, price, description, features, image_url, in_stock)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, sample_pianos)
-    
-    conn.commit()
-    conn.close()
+        # Check if pianos table is empty
+        cursor.execute('SELECT COUNT(*) FROM pianos')
+        if cursor.fetchone()[0] == 0:
+            sample_pianos = [
+                ('Steinway & Sons D-274', 'Steinway & Sons', 98000, 'Grand Piano', 88, 'Premium concert grand piano with exceptional sound quality and touch', 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=500&h=400&fit=crop', 1),
+                ('Yamaha CFX', 'Yamaha', 78500, 'Grand Piano', 88, 'Professional grand piano ideal for concert halls and studios', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=400&fit=crop', 1),
+                ('Roland FP-90X', 'Roland', 3995, 'Digital Piano', 88, 'Portable digital piano with realistic sound engine and weighted keys', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=400&fit=crop', 1),
+                ('Kawai K-300', 'Kawai', 45000, 'Upright Piano', 88, 'Professional upright piano for teaching and performance', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&h=400&fit=crop', 1),
+                ('Casio Privia PX-870', 'Casio', 1299, 'Digital Piano', 88, 'Compact digital piano with excellent sound and portability', 'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=500&h=400&fit=crop', 1),
+                ('Bösendorfer 290 Imperial', 'Bösendorfer', 125000, 'Grand Piano', 97, 'Legendary Austrian grand piano with unique sound character', 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=500&h=400&fit=crop', 1),
+                ('Korg Kross 2', 'Korg', 2499, 'Synthesizer Piano', 88, 'Advanced synthesizer with piano sounds and synthesis capabilities', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=400&fit=crop', 1),
+                ('Schimmel K122', 'Schimmel', 35000, 'Upright Piano', 88, 'German-crafted upright piano for studios and schools', 'https://images.unsplash.com/photo-1519412666065-38cd8083d218?w=500&h=400&fit=crop', 1),
+            ]
+            cursor.executemany(
+                'INSERT INTO pianos (name, brand, price, type, keys, description, image_url, in_stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                sample_pianos
+            )
+        conn.commit()
 
 init_db()
 
-# Pydantic models
-class OrderCreate(BaseModel):
-    customer_name: str
-    email: str
-    phone: str
-    address: str
-    piano_id: int
-    quantity: int = 1
-
-class ContactCreate(BaseModel):
-    name: str
-    email: str
-    subject: Optional[str] = None
-    message: str
-
-# Routes
 @app.get("/")
-async def serve_home():
+async def read_root():
     return FileResponse("index.html")
 
 @app.get("/api/pianos")
-async def get_pianos(category: Optional[str] = None):
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    if category and category != "all":
-        cursor.execute("SELECT * FROM pianos WHERE category = ? ORDER BY price DESC", (category,))
-    else:
-        cursor.execute("SELECT * FROM pianos ORDER BY price DESC")
-    
-    pianos = cursor.fetchall()
-    conn.close()
-    
-    return [dict(row) for row in pianos]
+async def get_pianos():
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM pianos')
+        pianos = [dict(row) for row in cursor.fetchall()]
+    return pianos
 
 @app.get("/api/pianos/{piano_id}")
 async def get_piano(piano_id: int):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM pianos WHERE id = ?", (piano_id,))
-    piano = cursor.fetchone()
-    conn.close()
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM pianos WHERE id = ?', (piano_id,))
+        piano = cursor.fetchone()
+    if piano:
+        return dict(piano)
+    return {"error": "Piano not found"}
+
+@app.post("/api/cart/add")
+async def add_to_cart(item: dict):
+    piano_id = item.get("piano_id")
+    quantity = item.get("quantity", 1)
     
-    if not piano:
-        raise HTTPException(status_code=404, detail="Piano not found")
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM cart WHERE piano_id = ?', (piano_id,))
+        existing = cursor.fetchone()
+        
+        if existing:
+            cursor.execute('UPDATE cart SET quantity = quantity + ? WHERE piano_id = ?', (quantity, piano_id))
+        else:
+            cursor.execute('INSERT INTO cart (piano_id, quantity) VALUES (?, ?)', (piano_id, quantity))
+        conn.commit()
     
-    return dict(piano)
+    return {"status": "success", "message": "Added to cart"}
+
+@app.get("/api/cart")
+async def get_cart():
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT c.id, p.id as piano_id, p.name, p.price, p.image_url, c.quantity
+            FROM cart c
+            JOIN pianos p ON c.piano_id = p.id
+        ''')
+        items = [dict(row) for row in cursor.fetchall()]
+    return items
+
+@app.delete("/api/cart/{cart_id}")
+async def remove_from_cart(cart_id: int):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM cart WHERE id = ?', (cart_id,))
+        conn.commit()
+    return {"status": "success", "message": "Removed from cart"}
+
+@app.post("/api/cart/clear")
+async def clear_cart():
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM cart')
+        conn.commit()
+    return {"status": "success", "message": "Cart cleared"}
 
 @app.post("/api/orders")
-async def create_order(order: OrderCreate):
-    conn = get_db()
-    cursor = conn.cursor()
+async def create_order(order: dict):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        
+        # Get cart items
+        cursor.execute('''
+            SELECT c.id, p.id as piano_id, p.name, p.price, c.quantity
+            FROM cart c
+            JOIN pianos p ON c.piano_id = p.id
+        ''')
+        items = [dict(row) for row in cursor.fetchall()]
+        
+        if not items:
+            return {"error": "Cart is empty"}
+        
+        # Calculate total
+        total_price = sum(item['price'] * item['quantity'] for item in items)
+        
+        # Create order
+        cursor.execute('''
+            INSERT INTO orders (name, email, phone, address, total_price, items)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (
+            order.get('name'),
+            order.get('email'),
+            order.get('phone'),
+            order.get('address'),
+            total_price,
+            json.dumps(items)
+        ))
+        conn.commit()
+        
+        # Clear cart
+        cursor.execute('DELETE FROM cart')
+        conn.commit()
+        
+        order_id = cursor.lastrowid
     
-    # Get piano price
-    cursor.execute("SELECT price, name FROM pianos WHERE id = ?", (order.piano_id,))
-    piano = cursor.fetchone()
-    
-    if not piano:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Piano not found")
-    
-    total_price = piano["price"] * order.quantity
-    
-    cursor.execute("""
-        INSERT INTO orders (customer_name, email, phone, address, piano_id, quantity, total_price)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (order.customer_name, order.email, order.phone, order.address, 
-          order.piano_id, order.quantity, total_price))
-    
-    order_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    
-    return {
-        "message": "Order placed successfully!",
-        "order_id": order_id,
-        "piano_name": piano["name"],
-        "total_price": total_price
-    }
+    return {"status": "success", "message": "Order created", "order_id": order_id, "total_price": total_price}
 
-@app.get("/api/orders")
-async def get_orders():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT o.*, p.name as piano_name, p.model as piano_model
-        FROM orders o
-        JOIN pianos p ON o.piano_id = p.id
-        ORDER BY o.created_at DESC
-    """)
-    orders = cursor.fetchall()
-    conn.close()
+@app.get("/api/orders/{order_id}")
+async def get_order(order_id: int):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM orders WHERE id = ?', (order_id,))
+        order = cursor.fetchone()
     
-    return [dict(row) for row in orders]
-
-@app.post("/api/contact")
-async def create_contact(contact: ContactCreate):
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        INSERT INTO contacts (name, email, subject, message)
-        VALUES (?, ?, ?, ?)
-    """, (contact.name, contact.email, contact.subject, contact.message))
-    
-    conn.commit()
-    conn.close()
-    
-    return {"message": "Thank you for your message! We'll get back to you soon."}
-
-@app.get("/api/categories")
-async def get_categories():
-    return [
-        {"id": "all", "name": "All Pianos"},
-        {"id": "Grand Piano", "name": "Grand Pianos"},
-        {"id": "Upright Piano", "name": "Upright Pianos"},
-        {"id": "Digital Piano", "name": "Digital Pianos"},
-        {"id": "Hybrid Piano", "name": "Hybrid Pianos"}
-    ]
+    if order:
+        order_dict = dict(order)
+        order_dict['items'] = json.loads(order_dict['items'])
+        return order_dict
+    return {"error": "Order not found"}
 
 if __name__ == "__main__":
     import uvicorn
