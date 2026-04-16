@@ -76,7 +76,7 @@ def init_db():
                 ('Roland FP-90X', 'Roland', 3995, 'Digital Piano', 88, 'Portable digital piano with realistic sound engine and weighted keys', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&h=400&fit=crop', 1),
                 ('Kawai K-300', 'Kawai', 45000, 'Upright Piano', 88, 'Professional upright piano for teaching and performance', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&h=400&fit=crop', 1),
                 ('Casio Privia PX-870', 'Casio', 1299, 'Digital Piano', 88, 'Compact digital piano with excellent sound and portability', 'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=500&h=400&fit=crop', 1),
-                ('Bösendorfer 290 Imperial', 'Bösendorfer', 125000, 'Grand Piano', 97, 'Legendary Austrian grand piano with unique sound character', 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=500&h=400&fit=crop', 1),
+                ('Bosendorfer 290 Imperial', 'Bosendorfer', 125000, 'Grand Piano', 97, 'Legendary Austrian grand piano with unique sound character', 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=500&h=400&fit=crop', 1),
                 ('Korg Kross 2', 'Korg', 2499, 'Synthesizer Piano', 88, 'Advanced synthesizer with piano sounds and synthesis capabilities', 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=400&fit=crop', 1),
                 ('Schimmel K122', 'Schimmel', 35000, 'Upright Piano', 88, 'German-crafted upright piano for studios and schools', 'https://images.unsplash.com/photo-1519412666065-38cd8083d218?w=500&h=400&fit=crop', 1),
             ]
@@ -90,7 +90,7 @@ init_db()
 
 @app.get("/")
 async def read_root():
-    return FileResponse("./index.html")
+    return FileResponse("index.html")
 
 @app.get("/api/pianos")
 async def get_pianos():
