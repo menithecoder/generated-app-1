@@ -2,6 +2,7 @@ import os
 import sqlite3
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import contextmanager
 import json
@@ -89,7 +90,7 @@ init_db()
 
 @app.get("/")
 async def read_root():
-    return FileResponse("index.html")
+    return FileResponse("./index.html")
 
 @app.get("/api/pianos")
 async def get_pianos():
