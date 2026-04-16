@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Academy - Learn Piano Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+            cursor: pointer;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6rem 20px;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #667eea;
+            color: white;
+            border: 2px solid white;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #333;
+        }
+
+        .section-title span {
+            color: #667eea;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .lesson-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .lesson-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            min-height: 150px;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .lesson-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .lesson-body {
+            padding: 1.5rem;
+        }
+
+        .lesson-body p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            background: #f0f0f0;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #667eea;
+        }
+
+        #lessons-section {
+            background: #f9f9f9;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        #contact-section {
+            background: #f9f9f9;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .price-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s;
+        }
+
+        .price-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .price-card.popular {
+            border: 3px solid #667eea;
+            transform: scale(1.05);
+        }
+
+        .price-tag {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+
+        .price-card ul {
+            list-style: none;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .price-card li {
+            padding: 0.5rem 0;
+            color: #666;
+        }
+
+        .price-card li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stars {
+            color: #ffc107;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial p {
+            color: #666;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            font-weight: bold;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            nav {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .price-card.popular {
+                transform: scale(1);
+            }
+        }
+
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                🎹 Piano Academy
+            </div>
+            <nav>
+                <a onclick="scrollTo('home')">Home</a>
+                <a onclick="scrollTo('features')">Features</a>
+                <a onclick="scrollTo('lessons')">Lessons</a>
+                <a onclick="scrollTo('pricing')">Pricing</a>
+                <a onclick="scrollTo('testimonials')">Reviews</a>
+                <a onclick="scrollTo('contact')">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Master the Piano</h1>
+            <p>Learn to play the piano from world-class instructors. Start your musical journey today!</p>
+            <button class="btn" onclick="scrollTo('lessons')">Explore Lessons</button>
+            <button class="btn btn-secondary" onclick="scrollTo('contact')" style="margin-left: 1rem;">Get Started</button>
+        </div>
+    </section>
+
+    <section id="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose <span>Piano Academy</span></h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">👨‍🏫</div>
+                    <h3>Expert Instructors</h3>
+                    <p>Learn from classically trained piano teachers with over 20 years of experience</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>Structured Curriculum</h3>
+                    <p>Follow our comprehensive learning path from beginner to advanced level</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏰</div>
+                    <h3>Flexible Schedule</h3>
+                    <p>Learn at your own pace with lifetime access to all course materials</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎵</div>
+                    <h3>Real Music</h3>
+                    <p>Play classical, jazz, pop, and contemporary pieces from day one</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💻</div>
+                    <h3>Interactive Tools</h3>
+                    <p>Practice with our advanced music theory tools and interactive exercises</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Certifications</h3>
+                    <p>Earn recognized certificates upon completing each level</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="lessons-section">
+        <div class="container">
+            <h2 class="section-title">Our <span>Lessons</span></h2>
+            <div class="lessons-grid" id="lessons-container">
+                <div class="lesson-card">
+                    <div class="lesson-header">
+                        <h3>Getting Started with Piano Basics</h3>
+                    </div>
+                    <div class="lesson-body">
+                        <p>Learn the fundamentals of piano, including posture, hand position, and basic note reading.</p>
+                        <div class="lesson-meta">
+                            <span class="badge">⏱️ 45 mins</span>
+                            <span class="badge">Beginner</span>
+                        </div>
+                        <button class="btn" onclick="scrollTo('contact')">Enroll</button>
+                    </div>
+                </div>
+                <div class="lesson-card">
+                    <div class="lesson-header">
+                        <h3>Mastering Scales & Arpeggios</h3>
+                    </div>
+                    <div class="lesson-body">
+                        <p>Build technical skills and finger strength with comprehensive scale and arpeggio exercises.</p>
+                        <div class="lesson-meta">
+                            <span class="badge">⏱️ 60 mins</span>
+                            <span class="badge">Intermediate</span>
+                        </div>
+                        <button class="btn" onclick="scrollTo('contact')">Enroll</button>
+                    </div>
+                </div>
+                <div class="lesson-card">
+                    <div class="lesson-header">
+                        <h3>Classical Masterpieces</h3>
+                    </div>
+                    <div class="lesson-body">
+                        <p>Dive into iconic classical pieces by Chopin, Bach, and Mozart with detailed technique guidance.</p>
+                        <div class="lesson-meta">
+                            <span class="badge">⏱️ 90 mins</span>
+                            <span class="badge">Advanced</span>
+                        </div>
+                        <button class="btn" onclick="scrollTo('contact')">Enroll</button>
+                    </div>
+                </div>
+                <div class="lesson-card">
+                    <div class="lesson-header">
+                        <h3>Jazz Improvisation</h3>
+                    </div>
+                    <div class="lesson-body">
+                        <p>Discover the art of jazz improvisation and learn to create your own musical expressions.</p>
+                        <div class="lesson-meta">
+                            <span class="badge">⏱️ 75 mins</span>
+                            <span class="badge">Intermediate</span>
+                        </div>
+                        <button class="btn" onclick="scrollTo('contact')">Enroll</button>
+                    </div>
+                </div>
+                <div class="lesson-card">
+                    <div class="lesson-header">
+                        <h3>Music Theory Fundamentals</h3>
+                    </div>
+                    <div class="lesson-body">
+                        <p>Understand music theory concepts including harmony, chord progressions, and composition.</p>
+                        <div class="lesson-meta">
+                            <span class="badge">⏱️ 60 mins</span>
+                            <span class="badge">Beginner</span>
+                        </div>
+                        <button class="btn" onclick="scrollTo('contact')">Enroll</button>
+                    </div>
+                </div>
+                <div class="lesson-card">
+                    <div class="lesson-header">
+                        <h3>Contemporary & Pop Piano</h3>
+                    </div>
+                    <div class="lesson-body">
+                        <p>Learn modern techniques and play your favorite pop songs with professional arrangements.</p>
+                        <div class="lesson-meta">
+                            <span class="badge">⏱️ 50 mins</span>
+                            <span class="badge">Beginner</span>
+                        </div>
+                        <button class="btn" onclick="scrollTo('contact')">Enroll</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing">
+        <div class="container">
+            <h2 class="section-title">Flexible <span>Pricing Plans</span></h2>
+            <div class="pricing">
+                <div class="price-card">
+                    <h3>Starter</h3>
+                    <div class="price-tag">$29<small style="font-size: 0.5em;">/month</small></div>
+                    <ul>
+                        <li>5 lessons per month</li>
+                        <li>Basic course materials</li>
+                        <li>Email support</li>
+                        <li>Progress tracking</li>
+                    </ul>
+                    <button class="btn" onclick="scrollTo('contact')">Get Started</button>
+                </div>
+                <div class="price-card popular">
+                    <h3>⭐ Professional</h3>
+                    <div class="price-tag">$79<small style="font-size: 0.5em;">/month</small></div>
+                    <ul>
+                        <li>Unlimited lessons</li>
+                        <li>All course materials</li>
+                        <li>1-on-1 mentoring</li>
+                        <li>Progress tracking</li>
+                        <li>Certificate of completion</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <button class="btn" onclick="scrollTo('contact')">Get Started</button>
+                </div>
+                <div class="price-card">
+                    <h3>Premium</h3>
+                    <div class="price-tag">$199<small style="font-size: 0.5em;">/month</small></div>
+                    <ul>
+                        <li>Everything in Professional</li>
+                        <li>Weekly live group sessions</li>
+                        <li>Personal practice plan</li>
+                        <li>Advanced recordings</li>
+                        <li>Lifetime access</li>
+                    </ul>
+                    <button class="btn" onclick="scrollTo('contact')">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials">
+        <div class="container">
+            <h2 class="section-title">Student <span>Testimonials</span></h2>
+            <div class="testimonials">
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"I started with zero piano experience and now I can play full pieces. The instructors are incredibly patient and knowledgeable!"</p>
+                    <div class="testimonial-author">— Sarah Mitchell</div>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"The structured curriculum made learning so easy. I completed the beginner level in just 3 months. Highly recommended!"</p>
+                    <div class="testimonial-author">— Michael Chen</div>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"Worth every penny. The interactive tools and practice exercises are game-changers. I'm now performing in local recitals!"</p>
+                    <div class="testimonial-author">— Emma Rodriguez</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact-section">
+        <div class="container">
+            <h2 class="section-title">Get In <span>Touch</span></h2>
+            <div class="contact-form" id="contact">
+                <div class="success-message" id="success-message">Thank you! We'll be in touch soon.</div>
+                <form onsubmit="submitContact(event)">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Piano Academy. All rights reserved. | Learn music, change your life.</p>
+    </footer>
+
+    <script>
+        function scrollTo(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        async function submitContact(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, message })
+                });
+
+                if (response.ok) {
+                    document.getElementById('success-message').style.display = 'block';
+                    document.querySelector('form').reset();
+                    setTimeout(() => {
+                        document.getElementById('success-message').style.display = 'none';
+                    }, 5000);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function loadLessons() {
+            try {
+                const response = await fetch('/api/lessons');
+                const lessons = await response.json();
+                
+                if (lessons.length > 0) {
+                    const lessonsContainer = document.getElementById('lessons-container');
+                    lessonsContainer.innerHTML = '';
+                    
+                    lessons.forEach(lesson => {
+                        const lessonCard = document.createElement('div');
+                        lessonCard.className = 'lesson-card';
+                        lessonCard.innerHTML = `
+                            <div class="lesson-header">
+                                <h3>${lesson.title}</h3>
+                            </div>
+                            <div class="lesson-body">
+                                <p>${lesson.description}</p>
+                                <div class="lesson-meta">
+                                    <span class="badge">⏱️ ${lesson.duration} mins</span>
+                                    <span class="badge">${lesson.level}</span>
+                                </div>
+                                <button class="btn" onclick="scrollTo('contact')">Enroll</button>
+                            </div>
+                        `;
+                        lessonsContainer.appendChild(lessonCard);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading lessons:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadLessons);
+    </script>
+</body>
+</html>
